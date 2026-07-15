@@ -1,0 +1,27 @@
+{
+  "name": "agent-runtime-sdk",
+  "version": "0.1.0",
+  "description": "A TypeScript SDK foundation for running agent requests through provider-agnostic runtime contracts.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "agent",
+    "runtime",
+    "sdk"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
