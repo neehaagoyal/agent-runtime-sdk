@@ -1,3 +1,6 @@
+export { AgentRuntime } from "./runtime/AgentRuntime.js";
+export type { AgentRuntimeOptions } from "./runtime/AgentRuntime.js";
+
 export type {
   AgentRunInput,
   AgentRunMetadata,
