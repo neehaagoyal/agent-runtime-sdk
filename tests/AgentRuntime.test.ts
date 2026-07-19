@@ -37,11 +37,42 @@ describe("AgentRuntime", () => {
     );
   });
 
-  it("validates input.input is a non-empty string", async () => {
+  it("throws a clear error when the input object is missing", async () => {
+    const runtime = new AgentRuntime({ provider: new MockProvider() });
+
+    await expect(runtime.run(undefined as unknown as { input: string })).rejects.toThrow(
+      AgentRuntimeError,
+    );
+    await expect(runtime.run(undefined as unknown as { input: string })).rejects.toThrow(
+      "AgentRuntime input.input must be a non-empty string.",
+    );
+  });
+
+  it("throws a clear error when input.input is empty", async () => {
     const runtime = new AgentRuntime({ provider: new MockProvider() });
 
     await expect(runtime.run({ input: "" })).rejects.toThrow(AgentRuntimeError);
+    await expect(runtime.run({ input: "" })).rejects.toThrow(
+      "AgentRuntime input.input must be a non-empty string.",
+    );
+  });
+
+  it("throws a clear error when input.input is whitespace only", async () => {
+    const runtime = new AgentRuntime({ provider: new MockProvider() });
+
+    await expect(runtime.run({ input: "   " })).rejects.toThrow(AgentRuntimeError);
     await expect(runtime.run({ input: "   " })).rejects.toThrow(
+      "AgentRuntime input.input must be a non-empty string.",
+    );
+  });
+
+  it("throws a clear error when input.input is not a string", async () => {
+    const runtime = new AgentRuntime({ provider: new MockProvider() });
+
+    await expect(runtime.run({ input: 42 } as unknown as { input: string })).rejects.toThrow(
+      AgentRuntimeError,
+    );
+    await expect(runtime.run({ input: 42 } as unknown as { input: string })).rejects.toThrow(
       "AgentRuntime input.input must be a non-empty string.",
     );
   });
