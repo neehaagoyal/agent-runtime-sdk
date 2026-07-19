@@ -34,6 +34,42 @@ describe("MockProvider", () => {
     });
   });
 
+  it("exposes the stable mock provider name", () => {
+    const provider = new MockProvider();
+
+    expect(provider.name).toBe("mock");
+  });
+
+  it("returns deterministic text across repeated calls", async () => {
+    const provider = new MockProvider();
+
+    const first = await provider.generate({ input: "first request" });
+    const second = await provider.generate({ input: "second request with different text" });
+
+    expect(first.text).toBe("Mock provider response");
+    expect(second.text).toBe("Mock provider response");
+  });
+
+  it("includes usage metadata based on input and output token counts", async () => {
+    const provider = new MockProvider({ responseText: "short response" });
+
+    const response = await provider.generate({ input: "count these input tokens" });
+
+    expect(response.metadata.usage).toEqual({
+      inputTokens: 4,
+      outputTokens: 2,
+      totalTokens: 6,
+    });
+  });
+
+  it("includes a finish reason", async () => {
+    const provider = new MockProvider();
+
+    const response = await provider.generate({ input: "finish reason" });
+
+    expect(response.metadata.finishReason).toBe("stop");
+  });
+
   it("supports deterministic custom response text and model metadata", async () => {
     const provider = new MockProvider({
       responseText: "Custom test response",
