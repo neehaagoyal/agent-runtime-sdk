@@ -1,7 +1,15 @@
+export type ProviderMessageRole = "system" | "user" | "assistant";
+
+export interface ProviderMessage {
+  role: ProviderMessageRole;
+  content: string;
+}
+
 export interface ProviderRequest {
   input: string;
   instructions?: string;
   context?: Record<string, unknown>;
+  messages?: ProviderMessage[];
 }
 
 export interface ProviderResponseMetadata {

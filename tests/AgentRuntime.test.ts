@@ -186,6 +186,42 @@ describe("AgentRuntime", () => {
     });
   });
 
+  it("preserves OpenAI-style provider metadata through runtime normalization", async () => {
+    const provider = new CapturingProvider({
+      text: "OpenAI-style runtime response",
+      metadata: {
+        provider: "openai",
+        model: "gpt-test",
+        usage: { inputTokens: 6, outputTokens: 4, totalTokens: 10 },
+        finishReason: "stop",
+      },
+    });
+    const runtime = new AgentRuntime({ provider });
+
+    const response = await runtime.run({
+      input: "Hello OpenAI provider",
+      instructions: "Reply briefly",
+      context: { requestId: "req_openai" },
+    });
+
+    expect(provider.requests).toEqual([
+      {
+        input: "Hello OpenAI provider",
+        instructions: "Reply briefly",
+        context: { requestId: "req_openai" },
+      },
+    ]);
+    expect(response).toEqual({
+      text: "OpenAI-style runtime response",
+      metadata: {
+        provider: "openai",
+        model: "gpt-test",
+        usage: { inputTokens: 6, outputTokens: 4, totalTokens: 10 },
+        finishReason: "stop",
+      },
+    });
+  });
+
   it("returns normalized text and SDK-level metadata from MockProvider", async () => {
     const runtime = new AgentRuntime({ provider: new MockProvider() });
 
