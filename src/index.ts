@@ -15,11 +15,26 @@ export type {
   ProviderResponseMetadata,
 } from "./types/provider.js";
 
+export type {
+  Tool,
+  ToolCall,
+  ToolDefinition,
+  ToolExecutionRecord,
+  ToolExecutionResult,
+  ToolHandler,
+} from "./types/tool.js";
+
 export { AgentRuntimeError } from "./types/errors.js";
+export { ToolRegistry } from "./tools/ToolRegistry.js";
+export { executeToolCall } from "./tools/executeToolCall.js";
 
 export type { Provider } from "./providers/Provider.js";
 export { MockProvider } from "./providers/MockProvider.js";
 export type { MockProviderOptions } from "./providers/MockProvider.js";
 
-export { OpenAIProvider, mapProviderRequestToOpenAIMessages } from "./providers/OpenAIProvider.js";
+export {
+  OpenAIProvider,
+  mapProviderRequestToOpenAIMessages,
+  mapToolDefinitionToOpenAITool,
+} from "./providers/OpenAIProvider.js";
 export type { OpenAIProviderOptions } from "./providers/OpenAIProvider.js";

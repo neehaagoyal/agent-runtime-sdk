@@ -1,5 +1,6 @@
 import { AgentRuntimeError } from "../types/errors.js";
 import type { ProviderMessage, ProviderRequest, ProviderResponse } from "../types/provider.js";
+import type { ToolDefinition } from "../types/tool.js";
 import type { Provider } from "./Provider.js";
 
 export interface OpenAIProviderOptions {
@@ -14,10 +15,15 @@ type OpenAIChatMessage = {
   content: string;
 };
 
+type OpenAIToolCall = {
+  id: string;
+  function?: { name?: string; arguments?: string };
+};
+
 type OpenAIChatCompletionResponse = {
   model?: string;
   choices: Array<{
-    message?: { content?: string | null };
+    message?: { content?: string | null; tool_calls?: OpenAIToolCall[] };
     finish_reason?: string | null;
   }>;
   usage?: {
@@ -61,6 +67,9 @@ export class OpenAIProvider implements Provider {
         body: JSON.stringify({
           model: this.model,
           messages: mapProviderRequestToOpenAIMessages(request),
+          ...(request.tools && request.tools.length > 0
+            ? { tools: request.tools.map(mapToolDefinitionToOpenAITool) }
+            : {}),
         }),
       });
 
@@ -88,6 +97,11 @@ export class OpenAIProvider implements Provider {
             : undefined,
           finishReason: choice?.finish_reason ?? undefined,
         },
+        toolCalls: choice?.message?.tool_calls?.map((toolCall) => ({
+          id: toolCall.id,
+          name: toolCall.function?.name ?? "",
+          arguments: toolCall.function?.arguments ?? "{}",
+        })),
       };
     } catch (error) {
       if (error instanceof AgentRuntimeError) {
@@ -120,5 +134,16 @@ function mapProviderMessageToOpenAIMessage(message: ProviderMessage): OpenAIChat
   return {
     role: message.role,
     content: message.content,
+  };
+}
+
+export function mapToolDefinitionToOpenAITool(tool: ToolDefinition): Record<string, unknown> {
+  return {
+    type: "function",
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters ?? { type: "object", properties: {} },
+    },
   };
 }

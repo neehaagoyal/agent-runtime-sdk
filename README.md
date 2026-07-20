@@ -2,9 +2,9 @@
 
 Agent Runtime SDK is a TypeScript SDK foundation for running agent requests through a provider-agnostic runtime API. It gives application code one small runtime surface while providers implement a stable `Provider` contract behind it.
 
-## Week 2 Capabilities
+## Week 3 Capabilities
 
-Version `0.1.0` includes the Week 2 provider integration foundation:
+Version `0.1.0` includes the Week 3 tool-calling foundation:
 
 - `AgentRuntime` for validating and running agent requests.
 - A vendor-neutral `Provider` interface for model/provider adapters.
@@ -12,6 +12,8 @@ Version `0.1.0` includes the Week 2 provider integration foundation:
 - `OpenAIProvider` for sending provider-neutral requests to OpenAI chat completions.
 - Provider request support for prompt-style `input` plus `instructions`, or explicit ordered `messages`.
 - Normalized runtime responses with `text`, provider metadata, usage token metadata, and finish reasons.
+- A typed `ToolRegistry` for registering provider-neutral tool definitions and handlers.
+- Runtime execution of provider-requested tool calls with auditable `metadata.toolsUsed` records.
 - Unit and contract tests that run without external services, plus an optional live OpenAI integration test.
 
 ## Installation and Local Setup
@@ -74,6 +76,51 @@ const provider = new MockProvider({
 });
 ```
 
+
+## Tool Calling Usage
+
+Register tools with provider-neutral definitions and handlers, then pass the registry to `AgentRuntime`:
+
+```ts
+import { AgentRuntime, MockProvider, ToolRegistry } from "agent-runtime-sdk";
+
+const tools = new ToolRegistry([
+  {
+    definition: {
+      name: "getOrderStatus",
+      description: "Look up the status of an order by order ID.",
+      parameters: {
+        type: "object",
+        properties: { orderId: { type: "string" } },
+        required: ["orderId"],
+      },
+    },
+    execute: async ({ orderId }) => ({ orderId, status: "shipped" }),
+  },
+]);
+
+const runtime = new AgentRuntime({
+  provider: new MockProvider({
+    responseText: "Order lookup complete.",
+    toolCalls: [
+      { id: "call_1", name: "getOrderStatus", arguments: { orderId: "123" } },
+    ],
+  }),
+  tools,
+});
+
+const response = await runtime.run({
+  input: "Where is order 123?",
+});
+
+console.log(response.text);
+console.log(response.metadata.toolsUsed);
+```
+
+`ToolRegistry` rejects invalid or duplicate tools before runtime execution. During a run, `executeToolCall` parses JSON argument strings, looks up the requested tool, executes the handler with the runtime context, and records either a successful output or a failed record with a clear error message. Tool execution failures are observable in `response.metadata.toolsUsed` instead of being hidden.
+
+`MockProvider` can simulate tool calls by passing `toolCalls` in its constructor, which keeps tool-calling tests deterministic and free of network access or API keys.
+
 ## OpenAI Provider Usage
 
 Set an API key before constructing `OpenAIProvider`:
@@ -122,6 +169,8 @@ You may optionally set `OPENAI_MODEL`; otherwise the provider default is used.
 export { AgentRuntime } from "agent-runtime-sdk";
 export { MockProvider } from "agent-runtime-sdk";
 export { OpenAIProvider } from "agent-runtime-sdk";
+export { ToolRegistry } from "agent-runtime-sdk";
+export { executeToolCall } from "agent-runtime-sdk";
 export { mapProviderRequestToOpenAIMessages } from "agent-runtime-sdk";
 export { AgentRuntimeError } from "agent-runtime-sdk";
 
@@ -138,6 +187,12 @@ export type {
   ProviderRequest,
   ProviderResponse,
   ProviderResponseMetadata,
+  Tool,
+  ToolCall,
+  ToolDefinition,
+  ToolExecutionRecord,
+  ToolExecutionResult,
+  ToolHandler,
 } from "agent-runtime-sdk";
 ```
 
@@ -152,14 +207,21 @@ src/
     Provider.ts
     MockProvider.ts
     OpenAIProvider.ts
+  tools/
+    ToolRegistry.ts
+    executeToolCall.ts
   types/
     errors.ts
     provider.ts
     runtime.ts
+    tool.ts
 tests/
   AgentRuntime.test.ts
   MockProvider.test.ts
   OpenAIProvider.test.ts
+  ToolRegistry.test.ts
+  executeToolCall.test.ts
+  AgentRuntime.tools.test.ts
   providerContract.test.ts
   openai.integration.test.ts
   types.test.ts

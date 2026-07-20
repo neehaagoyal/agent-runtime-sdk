@@ -85,6 +85,7 @@ describe("AgentRuntime", () => {
         model: "test-model",
         usage: { inputTokens: 2, outputTokens: 2, totalTokens: 4 },
         finishReason: "stop",
+        toolsUsed: [],
       },
     }));
     const provider: Provider = { name: "test-provider", generate };
@@ -132,6 +133,7 @@ describe("AgentRuntime", () => {
           totalTokens: 7,
         },
         finishReason: "length",
+        toolsUsed: [],
       },
     });
     const runtime = new AgentRuntime({ provider });
@@ -160,6 +162,7 @@ describe("AgentRuntime", () => {
           totalTokens: 7,
         },
         finishReason: "length",
+        toolsUsed: [],
       },
     });
   });
@@ -182,6 +185,7 @@ describe("AgentRuntime", () => {
         model: undefined,
         usage: undefined,
         finishReason: undefined,
+        toolsUsed: [],
       },
     });
   });
@@ -194,6 +198,7 @@ describe("AgentRuntime", () => {
         model: "gpt-test",
         usage: { inputTokens: 6, outputTokens: 4, totalTokens: 10 },
         finishReason: "stop",
+        toolsUsed: [],
       },
     });
     const runtime = new AgentRuntime({ provider });
@@ -218,6 +223,7 @@ describe("AgentRuntime", () => {
         model: "gpt-test",
         usage: { inputTokens: 6, outputTokens: 4, totalTokens: 10 },
         finishReason: "stop",
+        toolsUsed: [],
       },
     });
   });
@@ -238,6 +244,7 @@ describe("AgentRuntime", () => {
           totalTokens: 5,
         },
         finishReason: "stop",
+        toolsUsed: [],
       },
     });
   });
