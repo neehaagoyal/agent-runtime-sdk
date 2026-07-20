@@ -3,6 +3,7 @@ import {
   AgentRuntimeError,
   OpenAIProvider,
   mapProviderRequestToOpenAIMessages,
+  mapToolDefinitionToOpenAITool,
 } from "../src/index.js";
 
 function jsonResponse(body: unknown, init: ResponseInit = { status: 200 }): Response {
@@ -79,6 +80,70 @@ describe("OpenAIProvider", () => {
           { role: "user", content: "Hello" },
         ],
       }),
+    });
+  });
+
+
+  it("maps SDK tool definitions into OpenAI tool definitions", () => {
+    expect(
+      mapToolDefinitionToOpenAITool({
+        name: "getOrderStatus",
+        description: "Look up order status.",
+        parameters: { type: "object", properties: { orderId: { type: "string" } } },
+      }),
+    ).toEqual({
+      type: "function",
+      function: {
+        name: "getOrderStatus",
+        description: "Look up order status.",
+        parameters: { type: "object", properties: { orderId: { type: "string" } } },
+      },
+    });
+  });
+
+  it("sends SDK tool definitions and normalizes OpenAI tool calls", async () => {
+    const fetchMock = vi.fn(async () =>
+      jsonResponse({
+        model: "gpt-test",
+        choices: [
+          {
+            message: {
+              content: "",
+              tool_calls: [
+                {
+                  id: "call_1",
+                  function: { name: "getOrderStatus", arguments: '{"orderId":"123"}' },
+                },
+              ],
+            },
+            finish_reason: "tool_calls",
+          },
+        ],
+      }),
+    );
+    const provider = new OpenAIProvider({ apiKey: "test-key", model: "gpt-test", fetch: fetchMock });
+
+    await expect(
+      provider.generate({
+        input: "Where is order 123?",
+        tools: [{ name: "getOrderStatus", description: "Look up order status." }],
+      }),
+    ).resolves.toMatchObject({
+      toolCalls: [{ id: "call_1", name: "getOrderStatus", arguments: '{"orderId":"123"}' }],
+      metadata: { finishReason: "tool_calls" },
+    });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body as string)).toMatchObject({
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "getOrderStatus",
+            description: "Look up order status.",
+            parameters: { type: "object", properties: {} },
+          },
+        },
+      ],
     });
   });
 

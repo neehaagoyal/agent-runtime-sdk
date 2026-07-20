@@ -1,9 +1,11 @@
 import type { ProviderRequest, ProviderResponse } from "../types/provider.js";
+import type { ToolCall } from "../types/tool.js";
 import type { Provider } from "./Provider.js";
 
 export interface MockProviderOptions {
   responseText?: string;
   model?: string;
+  toolCalls?: ToolCall[];
 }
 
 export class MockProvider implements Provider {
@@ -11,10 +13,12 @@ export class MockProvider implements Provider {
 
   private readonly responseText: string;
   private readonly model: string;
+  private readonly toolCalls: ToolCall[];
 
   constructor(options: MockProviderOptions = {}) {
     this.responseText = options.responseText ?? "Mock provider response";
     this.model = options.model ?? "mock-model";
+    this.toolCalls = options.toolCalls ?? [];
   }
 
   async generate(request: ProviderRequest): Promise<ProviderResponse> {
@@ -31,8 +35,9 @@ export class MockProvider implements Provider {
           outputTokens,
           totalTokens: inputTokens + outputTokens,
         },
-        finishReason: "stop",
+        finishReason: this.toolCalls.length > 0 ? "tool_calls" : "stop",
       },
+      ...(this.toolCalls.length > 0 ? { toolCalls: this.toolCalls } : {}),
     };
   }
 }

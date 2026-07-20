@@ -1,3 +1,5 @@
+import type { ToolCall, ToolDefinition } from "./tool.js";
+
 export type ProviderMessageRole = "system" | "user" | "assistant";
 
 export interface ProviderMessage {
@@ -10,6 +12,7 @@ export interface ProviderRequest {
   instructions?: string;
   context?: Record<string, unknown>;
   messages?: ProviderMessage[];
+  tools?: ToolDefinition[];
 }
 
 export interface ProviderResponseMetadata {
@@ -26,4 +29,5 @@ export interface ProviderResponseMetadata {
 export interface ProviderResponse {
   text: string;
   metadata: ProviderResponseMetadata;
+  toolCalls?: ToolCall[];
 }

@@ -1,3 +1,5 @@
+import type { ToolExecutionRecord } from "./tool.js";
+
 export interface AgentRunInput {
   input: string;
   instructions?: string;
@@ -13,6 +15,7 @@ export interface AgentRunMetadata {
     totalTokens?: number;
   };
   finishReason?: string;
+  toolsUsed: ToolExecutionRecord[];
 }
 
 export interface AgentRunResponse {
