@@ -1,4 +1,5 @@
 import type { ToolExecutionRecord } from "./tool.js";
+import type { ExecutionTrace } from "./trace.js";
 
 export interface AgentRunInput {
   input: string;
@@ -16,6 +17,7 @@ export interface AgentRunMetadata {
   };
   finishReason?: string;
   toolsUsed: ToolExecutionRecord[];
+  trace: ExecutionTrace;
 }
 
 export interface AgentRunResponse {

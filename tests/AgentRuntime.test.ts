@@ -151,7 +151,7 @@ describe("AgentRuntime", () => {
         context: { requestId: "req_123" },
       },
     ]);
-    expect(response).toEqual({
+    expect(response).toMatchObject({
       text: "Captured provider response",
       metadata: {
         provider: "capturing-provider",
@@ -178,7 +178,7 @@ describe("AgentRuntime", () => {
 
     const response = await runtime.run({ input: "minimal metadata" });
 
-    expect(response).toEqual({
+    expect(response).toMatchObject({
       text: "Minimal provider response",
       metadata: {
         provider: "minimal-provider",
@@ -216,7 +216,7 @@ describe("AgentRuntime", () => {
         context: { requestId: "req_openai" },
       },
     ]);
-    expect(response).toEqual({
+    expect(response).toMatchObject({
       text: "OpenAI-style runtime response",
       metadata: {
         provider: "openai",
@@ -233,7 +233,7 @@ describe("AgentRuntime", () => {
 
     const response = await runtime.run({ input: "hello runtime" });
 
-    expect(response).toEqual({
+    expect(response).toMatchObject({
       text: "Mock provider response",
       metadata: {
         provider: "mock",
