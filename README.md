@@ -226,3 +226,30 @@ tests/
   openai.integration.test.ts
   types.test.ts
 ```
+
+## Execution traces
+
+Every `AgentRuntime.run()` response includes a structured execution trace at `response.metadata.trace`. The trace is an ordered history of the run and includes timestamps, durations in milliseconds, provider activity, tool activity, and normalized errors when failures occur.
+
+```ts
+import { AgentRuntime, MockProvider } from "agent-runtime-sdk";
+
+const runtime = new AgentRuntime({
+  provider: new MockProvider(),
+});
+
+const response = await runtime.run({
+  input: "Summarize this request",
+});
+
+console.log(response.metadata.trace.events);
+```
+
+Trace events can include:
+
+- `runtime.start` and `runtime.end` for the complete agent run.
+- `provider.request` and `provider.response` for LLM/provider calls.
+- `tool.call.start` and `tool.call.result` for tool execution.
+- `runtime.error` when validation or provider execution fails.
+
+Each event has a stable `id`, `type`, and ISO `timestamp`. Completed operations include `durationMs`. Errors are represented with a normalized `{ name, message, code? }` shape so callers can inspect failures without depending on raw thrown values.

@@ -38,3 +38,23 @@ export {
   mapToolDefinitionToOpenAITool,
 } from "./providers/OpenAIProvider.js";
 export type { OpenAIProviderOptions } from "./providers/OpenAIProvider.js";
+
+export { TraceRecorder, normalizeTraceError } from "./trace/TraceRecorder.js";
+export type { TraceRecorderOptions } from "./trace/TraceRecorder.js";
+export { SystemTraceClock, durationMs } from "./trace/timing.js";
+export type { ClockReading, TraceClock } from "./trace/timing.js";
+
+export type {
+  ExecutionTrace,
+  ProviderRequestTraceEvent,
+  ProviderResponseTraceEvent,
+  RuntimeEndTraceEvent,
+  RuntimeErrorTraceEvent,
+  RuntimeStartTraceEvent,
+  ToolCallResultTraceEvent,
+  ToolCallStartTraceEvent,
+  TraceError,
+  TraceEvent,
+  TraceEventBase,
+  TraceEventType,
+} from "./types/trace.js";
